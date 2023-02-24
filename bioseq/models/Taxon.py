@@ -12,6 +12,8 @@ class Taxon(models.Model):
     ncbi_taxon_id = models.IntegerField(unique=True, blank=True, null=True)
     parent_taxon = models.ForeignKey("self", models.DO_NOTHING, related_name="children", null=True)
     node_rank = models.CharField(max_length=32, blank=True, null=True)
+    scientificName = models.CharField(max_length=255)
+    node_division = models.CharField(max_length=32, blank=True, null=True)
     genetic_code = models.PositiveIntegerField(blank=True, null=True)
     mito_genetic_code = models.PositiveIntegerField(blank=True, null=True)
     left_value = models.PositiveIntegerField(unique=True, blank=True, null=True)

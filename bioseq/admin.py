@@ -19,7 +19,6 @@ from .models.Location import Location
 from .models.BiodatabaseQualifierValue import BiodatabaseQualifierValue
 
 admin.site.register(Biosequence)
-admin.site.register(Biodatabase)
 admin.site.register(Ontology)
 admin.site.register(SeqfeatureQualifierValue)
 admin.site.register(BioentryDbxref)
@@ -33,6 +32,14 @@ admin.site.register(BiodatabaseQualifierValue)
 # admin.site.register(ToolRun)
 
 # BioentryForm = select2_modelform(Bioentry, attrs={'width': '250px'})
+
+@admin.register(Biodatabase)
+class BiodatabaseAdmin(admin.ModelAdmin):
+    search_fields = ["name","description"]
+    list_display = ["biodatabase_id","name","description"]
+    # form = BioentryForm
+    fields = ("biodatabase_id","name","description")
+
 
 @admin.register(Bioentry)
 class BiosequenceAdmin(admin.ModelAdmin):

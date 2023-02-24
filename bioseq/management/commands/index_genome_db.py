@@ -1,23 +1,13 @@
-import os
-import sys
 import warnings
-from tqdm import tqdm
-import subprocess as sp
-import gzip
-
-import Bio.SeqIO as bpio
-
+from Bio import BiopythonWarning, BiopythonParserWarning, BiopythonDeprecationWarning, BiopythonExperimentalWarning
 from django.core.management.base import BaseCommand
+from tqdm import tqdm
 
 from bioseq.io.BioIO import BioIO
-from Bio import BiopythonWarning, BiopythonParserWarning, BiopythonDeprecationWarning, BiopythonExperimentalWarning
-
 from bioseq.io.IndexerIO import IndexerIO
 from bioseq.models.Biodatabase import Biodatabase
 from bioseq.models.BiodatabaseQualifierValue import BiodatabaseQualifierValue
 from bioseq.models.BioentryQualifierValue import BioentryQualifierValue
-from bioseq.models.Ontology import Ontology
-from bioseq.models.Term import Term
 
 warnings.simplefilter('ignore', RuntimeWarning)
 warnings.simplefilter('ignore', BiopythonWarning)
@@ -33,7 +23,6 @@ class Command(BaseCommand):
         parser.add_argument('accession')
 
     def handle(self, *args, **options):
-
         accession = options['accession']
 
         biodb = Biodatabase.objects.get(name=accession)
@@ -42,7 +31,7 @@ class Command(BaseCommand):
         BiodatabaseQualifierValue.objects.filter(biodatabase=biodb).delete()
         BioentryQualifierValue.objects.filter(bioentry__biodatabase=biodb).delete()
         BioentryQualifierValue.objects.filter(bioentry__biodatabase=bioprotdb).delete()
-        #Term.objects.filter(ontology__name=Ontology.BIOINDEX).delete()
+        # Term.objects.filter(ontology__name=Ontology.BIOINDEX).delete()
 
         indexer = IndexerIO()
         indexer.init()
@@ -50,7 +39,7 @@ class Command(BaseCommand):
         indexer.index_entries(biodb)
 
         with tqdm(bioprotdb.entries.all()) as pbar:
-            for i,p in enumerate(pbar):
+            for i, p in enumerate(pbar):
                 pbar.set_description(p.name)
                 indexer.index_protein(p)
         self.stderr.write("genome indexed!")
