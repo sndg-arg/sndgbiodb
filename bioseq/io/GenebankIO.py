@@ -28,11 +28,20 @@ class GenebankIO:
     def check(self):
         return os.path.exists(self.gbk_path)
 
-    def init(self):
-        grep_cmd = f'cat "{self.gbk_path}" |  head  | grep "ACCESSION "'
-        if self.gbk_path.endswith(".gz"):
-            grep_cmd = 'z' + grep_cmd
-        self.accession = sp.check_output(grep_cmd, shell=True).decode("utf-8").strip().split()[1]
+    def init(self,accession=None):
+        if not accession:
+            grep_cmd = f'cat "{self.gbk_path}" |  head  | grep "ACCESSION "'
+            if self.gbk_path.endswith(".gz"):
+                grep_cmd = 'z' + grep_cmd
+            self.accession = sp.check_output(grep_cmd, shell=True).decode("utf-8").strip().split()
+            if len(self.accession)>1:
+                self.accession = self.accession[1]
+            else:
+                self.accession =None
+                raise Exception("Empty ACCESSION")
+        else:
+            self.accession = accession
+
 
         grep_cmd = f'grep -c "FEATURES *Location/Qualifiers" "{self.gbk_path}"'
         if self.gbk_path.endswith(".gz"):

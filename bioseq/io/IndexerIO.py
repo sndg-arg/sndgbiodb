@@ -75,6 +75,8 @@ class IndexerIO:
 
         t = Term.objects.get_or_create(ontology=self.index_ontology,
                                        identifier="IP")[0]
-        v = IsoelectricPoint.IsoelectricPoint(bioentry.seq.seq).pi
+        v = IsoelectricPoint.IsoelectricPoint(bioentry.seq.seq).pi()
         bqv = BioentryQualifierValue(bioentry=bioentry, term=t, value=str(v))
         bqv.save()
+
+

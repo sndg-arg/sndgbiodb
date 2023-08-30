@@ -1,0 +1,5 @@
+numpy==1.25.2
+biopython==1.81
+bgzip==0.4.0
+bcbio-gff==0.7.0
+pandas

@@ -10,21 +10,20 @@ from django.utils.translation import gettext_lazy as __
 from django.db import models
 from django.shortcuts import reverse
 
+from .Dbxref import Dbxref
 from .SeqfeatureQualifierValue import SeqfeatureQualifierValue
 from ..managers.BioentryManager import BioentryManager
 from ..models.Biodatabase import Biodatabase
 
 
 class Bioentry(models.Model):
-
     BioentryIdTerm = "BioentryId"
-
 
     bioentry_id = models.AutoField(primary_key=True)
     biodatabase = models.ForeignKey(Biodatabase, models.CASCADE, "entries")
     taxon = models.ForeignKey('Taxon', models.DO_NOTHING, blank=True, null=True)
     name = models.CharField(max_length=40)
-    accession = models.CharField(max_length=128)
+    accession = models.CharField(max_length=128,unique=True)
     identifier = models.CharField(max_length=40, blank=True, null=True)
     division = models.CharField(max_length=6, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
@@ -44,7 +43,8 @@ class Bioentry(models.Model):
 
     def get_absolute_url(self):
         return reverse(
-            'bioresources:' + ('protein_view' if self.biodatabase.name.endswith("_prots") else "nucleotide_view"),
+            'bioresources:' + (
+                'protein_view' if self.biodatabase.name.endswith(Biodatabase.PROT_POSTFIX) else "nucleotide_view"),
             args=[str(self.bioentry_id)])  # TODO: parametrizar la app del link
 
     def groupedFeatures(self):
@@ -55,7 +55,6 @@ class Bioentry(models.Model):
         return dict(group)
 
     def feature_counts(self):
-
         return {x["type_term__identifier"]: x["total"] for x in
                 self.features.values('type_term__identifier').annotate(total=Count("type_term")) if
                 x["type_term__identifier"] != "source"}
@@ -70,13 +69,15 @@ class Bioentry(models.Model):
         # beg = Biodatabase.objects.get(name=self.biodatabase.name.replace("_prots", ""))
         # feature = Seqfeature.objects.seqfeature_from_locus_tag(beg.biodatabase_id, self.accession)
         # feature = list(feature)[0]
-        return [x.value for x in
-                self.qualifiers.filter(
-                    term__name__in=[ SeqfeatureQualifierValue.GeneSymbolValue,
-                                     SeqfeatureQualifierValue.OldLocusTagValue,
-                                     SeqfeatureQualifierValue.ProteinIDValue,
-                                     SeqfeatureQualifierValue.AliasValue,
-                                     SeqfeatureQualifierValue.GeneValue])]
+        return list(set([x.value for x in
+                         self.qualifiers.all() if x.term.identifier in
+                         [SeqfeatureQualifierValue.GeneSymbolValue,
+                          SeqfeatureQualifierValue.OldLocusTagValue,
+                          SeqfeatureQualifierValue.ProteinIDValue,
+                          SeqfeatureQualifierValue.AliasValue,
+                          SeqfeatureQualifierValue.GeneValue
+                          ]] +
+                        [x.dbxref.accession for x in self.dbxrefs.all() if x.dbxref.dbname in [Dbxref.UnipGene]]))
 
     def product_description(self):
         qs = self.qualifiers.filter(term__name="product")
@@ -109,7 +110,8 @@ class Bioentry(models.Model):
     def ftype(self):
         return 40  # "protein"
 
-
+    def qualifiers_dict(self):
+        return {qual.term.identifier: qual.value for qual in self.qualifiers.all()}
 
     def __str__(self):
         return "BioEntry('%s')" % self.accession

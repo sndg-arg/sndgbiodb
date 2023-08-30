@@ -46,8 +46,12 @@ def bulk_save(iterator: Iterable, action: Callable[[BSeqFeature], Seqfeature], b
 class BioIO:
     included_feature_qualifiers = [SeqfeatureQualifierValue.GeneValue, SeqfeatureQualifierValue.LocusTagValue,
                                    SeqfeatureQualifierValue.DBXREFValue]
-    excluded_feature_qualifiers = [SeqfeatureQualifierValue.TranslationValue, SeqfeatureQualifierValue.GeneValue,
-                                   SeqfeatureQualifierValue.LocusTagValue, SeqfeatureQualifierValue.DBXREFValue,
+    excluded_feature_qualifiers = [SeqfeatureQualifierValue.TranslationValue,
+                                   #SeqfeatureQualifierValue.GeneValue,
+                                   #SeqfeatureQualifierValue.LocusTagValue,
+                                   "EC_number","GO_function","GO_process","GO_component",
+
+                                   SeqfeatureQualifierValue.DBXREFValue,
                                    SeqfeatureQualifierValue.ProductValue]
 
     GENOME_PROT_POSTFIX = "_prots"
@@ -140,12 +144,39 @@ class BioIO:
         Biosequence.objects.create(bioentry=prot, seq=seq, length=len(seq))
         # unip = Dbxref.objects.create(dbname="Uniprot", accession="P9WHW3")
         # BioentryDbxref.objects.create(bioentry=prot, dbxref=unip)
+        #print(feature.qualifiers)
         for key, value in feature.qualifiers.items():
             value = value[0]
             if key not in BioIO.excluded_feature_qualifiers:
                 term = Term.objects.get_or_create(identifier=key, ontology=self.ann_ontology)[0]
                 BioentryQualifierValue.objects.create(bioentry=prot, term=term,
                                                       value=value)
+        if "EC_number" in feature.qualifiers:
+            for term in feature.qualifiers["EC_number"]:
+                term = "EC:" + term
+                qs = Dbxref.objects.filter(dbname=Ontology.EC,accession=term)
+                if qs.exists():
+                    dbxref = qs.get()
+                    BioentryDbxref.objects.get_or_create(bioentry=be,dbxref=dbxref)
+                else:
+                    self.stderr.write(f"EC term {term} not found\n")
+
+        for k,v in {k:v for k,v in feature.qualifiers.items()
+                    if k in ["GO_function","GO_process","GO_component"]}.items():
+            if isinstance(v,str):
+                gos = [v]
+            else:
+                gos = v
+            for go in gos:
+                #GO_function="GO:0004853 - uroporphyrinogen decarboxylase
+                term = go.split()[0].upper()
+                qs = Dbxref.objects.filter(dbname=Ontology.GO,accession=term)
+                if qs.exists():
+                    dbxref = qs.get()
+                    BioentryDbxref.objects.get_or_create(bioentry=be,dbxref=dbxref)
+                else:
+                    self.stderr.write(f"go term {v} not found\n")
+
 
     def process_seqrecord(self, seqrecord):
         be = Bioentry(biodatabase=self.genomedb,
@@ -155,7 +186,7 @@ class BioIO:
             be.taxon = Taxon.objects.get(ncbi_taxon_id=self.ncbi_tax)
         be.save()
 
-        seq = Biosequence(bioentry=be, seq=str(seqrecord.seq), length=len(seqrecord.seq))
+        seq = Biosequence(bioentry=be, seq="", length=len(seqrecord.seq))
         seq.save()
 
         bulk_save(seqrecord.features, action=lambda f: self.process_feature(be, f), stderr=self.stderr)
@@ -171,5 +202,4 @@ class BioIO:
 
                 pbar.set_description(seqrecord.id)
                 self.process_seqrecord(seqrecord)
-
 

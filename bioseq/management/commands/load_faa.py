@@ -1,8 +1,7 @@
-import os
-import shutil
 import sys
 import warnings
-import subprocess as sp
+
+
 
 from django.core.management.base import BaseCommand
 
@@ -10,7 +9,6 @@ from bioseq.io.BioIO import BioIO
 from Bio import BiopythonWarning, BiopythonParserWarning, BiopythonDeprecationWarning, BiopythonExperimentalWarning
 
 from bioseq.io.GenebankIO import GenebankIO
-from bioseq.io.SeqStore import SeqStore
 from bioseq.io.TaxIO import TaxIO
 from bioseq.models.Ontology import Ontology
 
@@ -27,45 +25,33 @@ class Command(BaseCommand):
     help = 'Loads a genome in the database'
 
     def add_arguments(self, parser):
-        parser.add_argument('--accession', default=None)
-        parser.add_argument('--taxon', type=int, default=None)
-        parser.add_argument('--overwrite', action='store_true')
-        parser.add_argument('--datadir', default=os.environ.get("BIOSEQDATADIR","./data") )
+        parser.add_argument('accession', default=None)
+        parser.add_argument('taxon', type=int, default=None)
         parser.add_argument('gbk')
+        parser.add_argument('--overwrite', action='store_true')
+
 
     def handle(self, *args, **options):
         input_file = options['gbk']
         gbio = GenebankIO(input_file)
         assert gbio.check(), "'%s' does not exists" % input_file
 
-        try:
-            gbio.init(options["accession"])
-        except:
-            if not gbio.accession:
-                self.stderr.write(f'no ACCESSION was found, use --accession parameter\n')
-            else:
-                raise
-            sys.exit(1)
+        gbio.init()
 
-        ss = SeqStore(options["datadir"])
-        ss.create_idx_dir(options["accession"])
-        if ss.gbk(options["accession"]) != input_file:
-            if input_file.endswith(".gz"):
-                shutil.copy(input_file, ss.gbk(options["accession"]))
-            else:
-                sp.call(f'cat {input_file} | gzip > {ss.gbk(options["accession"])}', shell=True)
-        assert os.path.exists(ss.gbk(options["accession"])),f'"{ss.gbk(options["accession"])}" does not exists'
+        if not options['accession']:
+            accession = gbio.accession
+        else:
+            accession = options['accession']
 
         if not options['taxon']:
             if not gbio.taxon:
-                self.stderr.write("taxon could not be obtained from input gbk, use --taxon option\n")
-                sys.exit(2)
+                self.stderr.write("taxon could not be obtained from input gbk\n")
             else:
                 taxon = gbio.taxon
         else:
             taxon = options['taxon']
 
-        self.stderr.write(f'accession: {gbio.accession},taxon: {taxon},contigs: {gbio.total}\n')
+        self.stderr.write(f'accession: {accession},taxon: {taxon},contigs: {gbio.total}\n')
 
         tio = TaxIO()
         if not tio.id_exists_in_db(taxon):
@@ -74,7 +60,7 @@ class Command(BaseCommand):
                 tio.complete_tax(taxon)
             self.stderr.write(f"taxon {taxon} Download complete\n")
 
-        io = BioIO(gbio.accession, taxon)
+        io = BioIO(accession, taxon)
 
         if not Ontology.objects.filter(name=Ontology.SFS).exists():
             self.stderr.write(f'base ontologies not detecting, installing...')
@@ -82,10 +68,10 @@ class Command(BaseCommand):
             Ontology.load_go_base()
             self.stderr.write(f'base ontologies installed!')
         if io.exists() and options['overwrite']:
-            self.stderr.write(f'"{gbio.accession}" database already exists: removing...')
+            self.stderr.write(f'"{accession}" database already exists: removing...')
             io.delete_db()
         elif io.exists():
-            self.stderr.write(f'"{gbio.accession}" database already exists... use --overwrite to delete the existing one')
+            self.stderr.write(f'"{accession}" database already exists... use --overwrite to delete the existing one')
             sys.exit(1)
 
         io.create_db()

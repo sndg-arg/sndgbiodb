@@ -7,6 +7,9 @@ from django.shortcuts import reverse
 
 
 class Dbxref(models.Model):
+
+    UnipGene = "UnipGene"
+
     dbxref_id = models.AutoField(primary_key=True)
     dbname = models.CharField(max_length=40)
     accession = models.CharField(max_length=128)

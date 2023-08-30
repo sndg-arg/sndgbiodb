@@ -18,3 +18,6 @@ class BiodatabaseQualifierValue(models.Model):
         managed = True
         db_table = 'bioedatabase_qualifier_value'
         unique_together = (('biodatabase', 'term', 'rank'),)
+
+    def __repr__(self):
+        return f'BdbQV {self.term.identifier}: {self.value}'

@@ -81,7 +81,7 @@ class Ontology(models.Model):
 
         ontology = Ontology.objects.get_or_create(name=Ontology.GO)[0]
 
-        dbmap = {
+        Ontology.dbmap = {
             Ontology.GO_BP: Dbxref.objects.get_or_create(dbname=Ontology.GO_DBNAME, accession=Ontology.GO_BP, version=1)[
                 0],
             Ontology.GO_MF: Dbxref.objects.get_or_create(dbname=Ontology.GO_DBNAME, accession=Ontology.GO_MF, version=1)[
@@ -110,7 +110,7 @@ class Ontology(models.Model):
         gosubset_prok "Prokaryotic GO subset"
         virus_checked "Viral overhaul terms" """.split("\n"):
             k = x.strip().split(' ')[0]
-            dbmap[k] = Dbxref.objects.get_or_create(dbname=Ontology.GO_DBNAME, accession=k, version=1)[0]
+            Ontology.dbmap[k] = Dbxref.objects.get_or_create(dbname=Ontology.GO_DBNAME, accession=k, version=1)[0]
 
         part_of = Term.objects.get_or_create(identifier="part_of", ontology=graph_ontology)[0]
         regulates = Term.objects.get_or_create(identifier="regulates", ontology=graph_ontology)[0]

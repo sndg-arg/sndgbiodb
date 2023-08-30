@@ -43,8 +43,11 @@ class Seqfeature(models.Model):
 
     def __str__(self):
         ls = list(self.locations.all())
-        return "%s:%i-%i %s" % (self.bioentry.name, ls[0].start_pos, ls[-1].end_pos,
+        """return "%s:%i-%i %s" % (self.bioentry.name, ls[0].start_pos, ls[-1].end_pos,
+                       
                                 "|".join([k + ":" + v for k, v in self.qualifiers_dict().items()]))
+                                """
+        return f'SeqF {self.display_name} {self.bioentry.name}:{ ls[0].start_pos}-{ls[-1].end_pos,}'
 
     class Meta:
         managed = True

@@ -19,6 +19,7 @@ class SeqfeatureQualifierValue(models.Model):
 
 
 
+
     seqfeature_qualifiervalue_id = models.AutoField(primary_key=True)
     seqfeature = models.ForeignKey('Seqfeature', models.CASCADE, related_name="qualifiers")
     term = models.ForeignKey('Term', models.DO_NOTHING)

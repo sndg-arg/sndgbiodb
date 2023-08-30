@@ -17,12 +17,14 @@ from .models.Taxon import Taxon
 from .models.TaxonName import TaxonName
 from .models.Location import Location
 from .models.BiodatabaseQualifierValue import BiodatabaseQualifierValue
+from .models.TermDbxref import TermDbxref
 
 admin.site.register(Biosequence)
 admin.site.register(Ontology)
 admin.site.register(SeqfeatureQualifierValue)
 admin.site.register(BioentryDbxref)
 admin.site.register(BiodatabaseQualifierValue)
+admin.site.register(TermDbxref)
 
 # @admin.register(Tool)
 # class ToolAdmin(admin.ModelAdmin):

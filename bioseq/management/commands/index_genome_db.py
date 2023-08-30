@@ -28,9 +28,9 @@ class Command(BaseCommand):
         biodb = Biodatabase.objects.get(name=accession)
         bioprotdb = Biodatabase.objects.get(name=accession + BioIO.GENOME_PROT_POSTFIX)
 
-        BiodatabaseQualifierValue.objects.filter(biodatabase=biodb).delete()
-        BioentryQualifierValue.objects.filter(bioentry__biodatabase=biodb).delete()
-        BioentryQualifierValue.objects.filter(bioentry__biodatabase=bioprotdb).delete()
+        #BiodatabaseQualifierValue.objects.filter(biodatabase=biodb).delete()
+        #BioentryQualifierValue.objects.filter(bioentry__biodatabase=biodb).delete()
+        #BioentryQualifierValue.objects.filter(bioentry__biodatabase=bioprotdb).delete()
         # Term.objects.filter(ontology__name=Ontology.BIOINDEX).delete()
 
         indexer = IndexerIO()

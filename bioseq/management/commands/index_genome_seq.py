@@ -16,6 +16,7 @@ from django.core.management.base import BaseCommand
 from Bio import BiopythonWarning, BiopythonParserWarning, BiopythonDeprecationWarning, BiopythonExperimentalWarning
 
 from SNDG.Annotation.GenebankUtils import GenebankUtils
+from bioseq.io.SeqStore import SeqStore
 from bioseq.io.GenebankIO import GenebankIO
 
 warnings.simplefilter('ignore', RuntimeWarning)
@@ -40,22 +41,28 @@ class Command(BaseCommand):
     help = 'Index genome'
 
     def add_arguments(self, parser):
-
-        parser.add_argument('gbk')
+        parser.add_argument('--datadir', default=os.environ.get("BIOSEQDATADIR","./data") )
+        parser.add_argument('accession')
 
     def handle(self, *args, **options):
-
-        gbk = options['gbk']
+        acc = options['accession']
+        seqstore = SeqStore(options['datadir'])
+        gbk = seqstore.gbk(acc)
 
         gbio = GenebankIO(gbk)
         utils = GenebankUtils()
         assert gbio.check(), f"'{gbk}' does not exists!"
 
-        gbio.init()
-        genome_fna = gbk.replace(".gbk.gz", ".genome.fna.bgz")
+        gbio.init(acc)
+        """genome_fna = gbk.replace(".gbk.gz", ".genome.fna.bgz")
         genes_fna = gbk.replace(".gbk.gz", ".genes.fna.gz")
         faa = gbk.replace(".gbk.gz", ".faa.gz")
         gff = gbk.replace(".gbk.gz", ".gff.bgz")
+        """
+        genome_fna = seqstore.genome_fna(acc)
+        genes_fna = seqstore.genes_fna(acc)
+        faa = seqstore.faa(acc)
+        gff = seqstore.gff(acc)
 
         with BgzfWriter(genome_fna) as hf, gzip.open(faa, "wt") as hp, gzip.open(
                 genes_fna, "wt") as hge, BgzfWriter(gff) as hg:

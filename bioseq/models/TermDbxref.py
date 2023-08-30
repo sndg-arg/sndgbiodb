@@ -7,7 +7,7 @@ from bioseq.models.Term import Term
 class TermDbxref(models.Model):
     term_dbxref_id = models.AutoField(primary_key=True)
     term = models.ForeignKey(Term, models.CASCADE, related_name="dbxrefs")
-    dbxref = models.ForeignKey(Dbxref, models.DO_NOTHING)
+    dbxref = models.ForeignKey(Dbxref, models.DO_NOTHING,related_name="terms")
     rank = models.SmallIntegerField(default=1, null=True)
 
     class Meta:
