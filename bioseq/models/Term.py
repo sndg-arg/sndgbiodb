@@ -9,9 +9,9 @@ from .Dbxref import Dbxref
 
 class Term(models.Model):
     term_id = models.AutoField(primary_key=True)
-    name = models.TextField(blank=True, null=True)
+    name = models.TextField(blank=True, null=False)
     definition = models.TextField(blank=True, null=True)
-    identifier = models.CharField(max_length=255, blank=True, null=True)
+    identifier = models.CharField(max_length=255, blank=False, null=False)
     is_obsolete = models.CharField(max_length=1, blank=True, null=True)
     ontology = models.ForeignKey(Ontology, models.DO_NOTHING,related_name="terms")
     version = models.PositiveSmallIntegerField(default=1, null=True)

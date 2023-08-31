@@ -43,12 +43,19 @@ class IndexerIO:
 
     def index_entries(self, biodatabase: Biodatabase):
         acc = defaultdict(list)
+        BiodatabaseQualifierValue.objects.filter(biodatabase=biodatabase, term__ontology=self.index_ontology).delete()
+        BioentryQualifierValue.objects.filter(bioentry__biodatabase=biodatabase,
+                                              term__ontology=self.index_ontology).delete()
+
+
         for entry in biodatabase.entries.all():
             self.index_contig(entry, acc)
 
         for k, v in list(acc.items()):
+
             t = Term.objects.get_or_create(ontology=self.index_ontology,
                                            identifier=k)[0]
+
             bqv = BiodatabaseQualifierValue(biodatabase=biodatabase, term=t)
             # acc[t.identifier] = round(float(v) + float(acc[t.identifier]),2)
             if t.identifier == "GC":
@@ -57,10 +64,27 @@ class IndexerIO:
                 acc[t.identifier] = np.sum(acc[t.identifier])
 
             acc[t.identifier] = round(acc[t.identifier], 2)
+
             bqv.value = str(acc[t.identifier])
+
             bqv.save()
 
+    def index_proteome(self, biodatabase, biodatabaseprot):
+
+        BioentryQualifierValue.objects.filter(bioentry__biodatabase=biodatabase,
+                                              term__ontology=self.index_ontology).delete()
+
+        t = Term.objects.get_or_create(ontology=self.index_ontology,
+                                       identifier="COUNT_STRUCTS")[0]
+        bqv = BiodatabaseQualifierValue(biodatabase=biodatabase, term=t)
+        bqv.value = Bioentry.objects.filter(
+            biodatabase=biodatabaseprot,
+            structures__isnull=False
+        ).count()
+        bqv.save()
+
     def index_protein(self, bioentry: Bioentry):
+
         t = Term.objects.get_or_create(ontology=self.index_ontology,
                                        identifier="Length")[0]
         v = bioentry.seq.length
@@ -78,5 +102,3 @@ class IndexerIO:
         v = IsoelectricPoint.IsoelectricPoint(bioentry.seq.seq).pi()
         bqv = BioentryQualifierValue(bioentry=bioentry, term=t, value=str(v))
         bqv.save()
-
-

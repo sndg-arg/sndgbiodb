@@ -21,3 +21,6 @@ class BiodatabaseQualifierValue(models.Model):
 
     def __repr__(self):
         return f'BdbQV {self.term.identifier}: {self.value}'
+
+    def __str__(self):
+        return self.__repr__()

@@ -40,7 +40,7 @@ class BiodatabaseAdmin(admin.ModelAdmin):
     search_fields = ["name","description"]
     list_display = ["biodatabase_id","name","description"]
     # form = BioentryForm
-    fields = ("biodatabase_id","name","description")
+    fields = ("name","description")
 
 
 @admin.register(Bioentry)
