@@ -19,7 +19,7 @@ from .models.Location import Location
 from .models.BiodatabaseQualifierValue import BiodatabaseQualifierValue
 from .models.TermDbxref import TermDbxref
 
-admin.site.register(Biosequence)
+
 admin.site.register(Ontology)
 admin.site.register(SeqfeatureQualifierValue)
 admin.site.register(BioentryDbxref)
@@ -118,3 +118,15 @@ class TaxonNameAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         return super(TaxonNameAdmin, self).get_queryset(request).select_related("taxon")
 
+
+@admin.register(Biosequence)
+class BiosequenceAdmin(admin.ModelAdmin):
+    search_fields = ["bioentry__accession"]
+    list_display = ('be_accession','seq')
+    raw_id_fields = (
+        'bioentry',
+    )
+
+    @admin.display(description="bioentry_accession")
+    def be_accession(self, obj):
+        return obj.bioentry.accession
