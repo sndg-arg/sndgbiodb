@@ -10,6 +10,7 @@ from bioseq.io.BioIO import BioIO
 from Bio import BiopythonWarning, BiopythonParserWarning, BiopythonDeprecationWarning, BiopythonExperimentalWarning
 
 from bioseq.io.GenebankIO import GenebankIO
+from bioseq.io.SeqStore import SeqStore
 from bioseq.io.TaxIO import TaxIO
 from bioseq.models.Biodatabase import Biodatabase
 from bioseq.models.Bioentry import Bioentry
@@ -44,6 +45,7 @@ class Command(BaseCommand):
         parser.add_argument('--polling_interval', type=int, default=5)
         parser.add_argument('--mapping_tmp', type=str)
         parser.add_argument('--not_mapped', type=str, default="not_mapped.lst")
+        parser.add_argument('--datadir', default="./data")
 
     def handle(self, *args, **options):
         accession = options['accession'] + BioIO.GENOME_PROT_POSTFIX
@@ -51,7 +53,7 @@ class Command(BaseCommand):
         polling_interval = options['polling_interval']
 
         assert Biodatabase.objects.filter(name=accession).exists(), "'%s' does not exists" % accession
-
+        ss = SeqStore(options["datadir"])
         protein_ids_qs = BioentryQualifierValue.objects.filter(
             bioentry__biodatabase__name=accession,
             term__identifier="protein_id").values_list("bioentry__bioentry_id", "value")
@@ -60,12 +62,12 @@ class Command(BaseCommand):
         temperr = open(fd, "w")
 
         if not options["mapping_tmp"]:
-            _, resultpath = tempfile.mkstemp()
-        else:
-            resultpath = options["mapping_tmp"]
+            options["mapping_tmp"] = ss.db_dir(options["accession"]) + "/unips_mapping.csv"
+
+
 
         prot_id_bioentry = {}
-        if not os.path.exists(resultpath):
+        if not os.path.exists(options["mapping_tmp"]):
             txttable = ""
             with tqdm(range(0, len(protein_ids_qs), batch_size)) as pbar:
                 for i in pbar:
@@ -109,12 +111,12 @@ class Command(BaseCommand):
                              names="From\tEntry\tEntry Name\tReviewed\tProtein names\tGene Names\tOrganism\tLength".split(
                                  "\t"))
 
-            with open(resultpath, "w") as h:
+            with open(options["mapping_tmp"], "w") as h:
                 df.to_csv(h, index=False)
             self.stderr.write("------------------------\n")
         else:
 
-            df = pd.read_csv(options["mapping_tmp"])
+            df = pd.read_csv(options.get("mapping_tmp",options["mapping_tmp"] ))
             for bioentry_id, protein_id in protein_ids_qs:
                 prot_id_bioentry[protein_id] = bioentry_id
 
@@ -125,7 +127,7 @@ class Command(BaseCommand):
             BioentryQualifierValue.objects.filter(bioentry__biodatabase__name=accession,
                                                   term__identifier="UnipProtName").delete()
         unip_list = []
-        for protein_id, df_prot in tqdm(df.groupby("From")):
+        for protein_id, df_prot in tqdm(df.fillna("").groupby("From")):
             df_prot = df_prot.sort_values("Reviewed")
             unip_list.append(df_prot.iloc[0]["Entry"])
             bioentry_id = prot_id_bioentry[protein_id]
@@ -137,8 +139,8 @@ class Command(BaseCommand):
                 for idx, r in df_prot.iterrows():
                     db = "UnipSp" if r["Reviewed"] == "reviewed" else "UnipTr"
                     unips.append([db, r["Entry"]])
-
-                    genes += r["Gene Names"].split()
+                    if r["Gene Names"].split():
+                        genes += r["Gene Names"].split()
                     unip_protein_name = Term.objects.get_or_create(identifier="UnipProtName",
                                                                    ontology=Ontology.objects.get_or_create(
                                                                        name=Ontology.ANNTAGS)[0])[0]
@@ -162,9 +164,11 @@ class Command(BaseCommand):
 
         temperr.close()
 
-        self.stdout.write("\n".join(unip_list) + "\n")
+
         not_mapped = set(prot_id_bioentry) - set(df["From"])
         if not_mapped:
+            if not options["not_mapped"]:
+                options["not_mapped"] = ss.db_dir(options["accession"]) + "/unips_not_mapped.csv"
             self.stderr.write(f'({len(not_mapped)}) ids were not found: {options["not_mapped"]}\n')
             with open(options["not_mapped"], "w") as h:
                 h.write("\n".join(not_mapped))

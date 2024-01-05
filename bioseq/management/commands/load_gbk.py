@@ -51,7 +51,8 @@ class Command(BaseCommand):
         ss.create_idx_dir(options["accession"])
         if ss.gbk(options["accession"]) != input_file:
             if input_file.endswith(".gz"):
-                shutil.copy(input_file, ss.gbk(options["accession"]))
+                if os.path.abspath(input_file) != os.path.abspath(ss.gbk(options["accession"])):
+                    shutil.copy(input_file, ss.gbk(options["accession"]))
             else:
                 sp.call(f'cat {input_file} | gzip > {ss.gbk(options["accession"])}', shell=True)
         assert os.path.exists(ss.gbk(options["accession"])),f'"{ss.gbk(options["accession"])}" does not exists'

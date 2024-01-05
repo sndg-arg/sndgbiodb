@@ -90,7 +90,7 @@ class BioIO:
         type_term = Term.objects.get_or_create(ontology=self.sfk_ontology, identifier=feature.type)[0]
         source_term = Term.objects.get_or_create(ontology=self.sfk_ontology, identifier="calculated")[0]
 
-        display_name = (feature.qualifiersq[SeqfeatureQualifierValue.GeneValue][
+        display_name = (feature.qualifiers[SeqfeatureQualifierValue.GeneValue][
                             0] if SeqfeatureQualifierValue.GeneValue in feature.qualifiers else (
             feature.qualifiers[SeqfeatureQualifierValue.LocusTagValue][
                 0] if SeqfeatureQualifierValue.LocusTagValue in feature.qualifiers else feature.type))
