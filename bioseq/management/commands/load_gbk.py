@@ -48,14 +48,14 @@ class Command(BaseCommand):
             sys.exit(1)
 
         ss = SeqStore(options["datadir"])
-        ss.create_idx_dir(options["accession"])
-        if ss.gbk(options["accession"]) != input_file:
+        ss.create_idx_dir(gbio.accession)
+        if ss.gbk(gbio.accession) != input_file:
             if input_file.endswith(".gz"):
-                if os.path.abspath(input_file) != os.path.abspath(ss.gbk(options["accession"])):
-                    shutil.copy(input_file, ss.gbk(options["accession"]))
+                if os.path.abspath(input_file) != os.path.abspath(ss.gbk(gbio.accession)):
+                    shutil.copy(input_file, ss.gbk(gbio.accession))
             else:
-                sp.call(f'cat {input_file} | gzip > {ss.gbk(options["accession"])}', shell=True)
-        assert os.path.exists(ss.gbk(options["accession"])),f'"{ss.gbk(options["accession"])}" does not exists'
+                sp.call(f'cat {input_file} | gzip > {ss.gbk(gbio.accession)}', shell=True)
+        assert os.path.exists(ss.gbk(gbio.accession)),f'"{ss.gbk(gbio.accession)}" does not exists'
 
         if not options['taxon']:
             if not gbio.taxon:
