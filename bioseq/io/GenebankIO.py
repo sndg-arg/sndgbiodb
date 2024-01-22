@@ -30,7 +30,7 @@ class GenebankIO:
 
     def init(self,accession=None):
         if not accession:
-            grep_cmd = f'cat "{self.gbk_path}" |  head  | grep "ACCESSION "'
+            grep_cmd = f'cat "{self.gbk_path}" |  head  | grep "VERSION "'
             if self.gbk_path.endswith(".gz"):
                 grep_cmd = 'z' + grep_cmd
             self.accession = sp.check_output(grep_cmd, shell=True).decode("utf-8").strip().split()
@@ -42,7 +42,8 @@ class GenebankIO:
         else:
             self.accession = accession
 
-
+        print("hola")
+        print(self.accession)
         grep_cmd = f'grep -c "FEATURES *Location/Qualifiers" "{self.gbk_path}"'
         if self.gbk_path.endswith(".gz"):
             grep_cmd = 'z' + grep_cmd

@@ -119,9 +119,10 @@ class BioIO:
 
     def bioentry_from_feature(self, be, feature, sf):
         description = (
-            feature.qualifiers[SeqfeatureQualifierValue.ProductValue][0] if SeqfeatureQualifierValue.ProductValue else (
-                feature.qualifiers[SeqfeatureQualifierValue.NoteValue][
-                    0] if SeqfeatureQualifierValue.NoteValue in feature.qualifiers else ""))
+            feature.qualifiers.get(SeqfeatureQualifierValue.ProductValue, [""])[0] or (
+                feature.qualifiers.get(SeqfeatureQualifierValue.NoteValue, [""])[0]))
+        
+        
         gene = feature.qualifiers[SeqfeatureQualifierValue.GeneValue][
             0] if SeqfeatureQualifierValue.GeneValue in feature.qualifiers else feature.qualifiers["locus_tag"][0]
         locus_tag = feature.qualifiers[SeqfeatureQualifierValue.LocusTagValue][
