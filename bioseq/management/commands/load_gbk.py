@@ -34,6 +34,8 @@ class Command(BaseCommand):
         parser.add_argument('gbk')
 
     def handle(self, *args, **options):
+
+        # initializes the gbio object 
         input_file = options['gbk']
         gbio = GenebankIO(input_file)
         assert gbio.check(), "'%s' does not exists" % input_file

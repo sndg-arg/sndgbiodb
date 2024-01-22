@@ -29,6 +29,7 @@ class GenebankIO:
         return os.path.exists(self.gbk_path)
 
     def init(self,accession=None):
+        # If accession is not provided it saves the content of the "VERSION" atribute into accession 
         if not accession:
             grep_cmd = f'cat "{self.gbk_path}" |  head  | grep "VERSION "'
             if self.gbk_path.endswith(".gz"):
@@ -42,13 +43,13 @@ class GenebankIO:
         else:
             self.accession = accession
 
-        print("hola")
-        print(self.accession)
+        # Saves the number of Features to total
         grep_cmd = f'grep -c "FEATURES *Location/Qualifiers" "{self.gbk_path}"'
         if self.gbk_path.endswith(".gz"):
             grep_cmd = 'z' + grep_cmd
         self.total = int(sp.check_output(grep_cmd, shell=True))
 
+        # Saves the taxon id to taxon
         grep_cmd = f"cat {self.gbk_path} | grep 'db_xref=\"taxon:'|head -n1"
         if self.gbk_path.endswith(".gz"):
             grep_cmd = 'z' + grep_cmd
