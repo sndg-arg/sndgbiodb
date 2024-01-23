@@ -25,6 +25,7 @@ class SeqStore:
             os.makedirs(idx_dir)
         assert os.path.exists(idx_dir), f'"{idx_dir}" could not be created'
 
+    # All this funtions return the path that specific type of file 
     def gbk(self, accession):
         return f'{self.datadir}/{self.idx_dir(accession)}/{accession}/{accession}.gbk.gz'
 

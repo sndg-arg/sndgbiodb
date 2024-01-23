@@ -49,6 +49,7 @@ class Command(BaseCommand):
                 raise
             sys.exit(1)
 
+        # Esta parte parece estar chequeando que el path provisto sea correcto, preguntar.
         ss = SeqStore(options["datadir"])
         ss.create_idx_dir(gbio.accession)
         if ss.gbk(gbio.accession) != input_file:
@@ -59,6 +60,7 @@ class Command(BaseCommand):
                 sp.call(f'cat {input_file} | gzip > {ss.gbk(gbio.accession)}', shell=True)
         assert os.path.exists(ss.gbk(gbio.accession)),f'"{ss.gbk(gbio.accession)}" does not exists'
 
+        # Tries to get the taxon from the file or from the arguments
         if not options['taxon']:
             if not gbio.taxon:
                 self.stderr.write("taxon could not be obtained from input gbk, use --taxon option\n")
@@ -70,6 +72,7 @@ class Command(BaseCommand):
 
         self.stderr.write(f'accession: {gbio.accession},taxon: {taxon},contigs: {gbio.total}\n')
 
+        # Download the new taxon and initialized an BioIO object if the taxon is not in the db.
         tio = TaxIO()
         if not tio.id_exists_in_db(taxon):
             self.stderr.write(f"taxon {taxon} not in DB, downloading...\n")
@@ -79,6 +82,7 @@ class Command(BaseCommand):
 
         io = BioIO(gbio.accession, taxon)
 
+        # Check for base ontologies and overwrites the biodatabase if overwrite was provided
         if not Ontology.objects.filter(name=Ontology.SFS).exists():
             self.stderr.write(f'base ontologies not detecting, installing...')
             Ontology.load_ann_terms()

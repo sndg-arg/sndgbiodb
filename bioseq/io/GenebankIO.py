@@ -60,6 +60,7 @@ class GenebankIO:
         except:
             pass
 
+    # Returns an interator with all the lines in gbk file (aca me parece raro que diga contigs ya que casi toda la info no son contigs)
     def record_list(self, mode="t"):
         if self.gbk_path.endswith(".gz"):
             input_file_handle = gzip.open(self.gbk_path, "r" + mode)
