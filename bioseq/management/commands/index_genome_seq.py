@@ -75,6 +75,7 @@ class Command(BaseCommand):
                 self.write_gff_contig(contig, hg, id_handler, writer)
 
         cmd = f'tabix -p gff {gff}'
+        print(f'Command: {cmd}')
         sys.stderr.write(sp.check_output(cmd, shell=True).decode("utf-8"))
         cmd = f'samtools faidx {genome_fna}'
         sys.stderr.write(sp.check_output(cmd, shell=True).decode("utf-8"))

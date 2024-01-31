@@ -70,6 +70,7 @@ class BioIO:
     def exists(self):
         return Biodatabase.objects.filter(name=self.biodb_name).exists()
 
+    # Creates the 3 new entrys (gendb, rnadb and protein db) in the biodatabase table based on the accession used to create the bioIO object
     def create_db(self):
         self.genomedb = Biodatabase(name=self.biodb_name)
         self.genomedb.save()
@@ -119,9 +120,10 @@ class BioIO:
 
     def bioentry_from_feature(self, be, feature, sf):
         description = (
-            feature.qualifiers[SeqfeatureQualifierValue.ProductValue][0] if SeqfeatureQualifierValue.ProductValue else (
-                feature.qualifiers[SeqfeatureQualifierValue.NoteValue][
-                    0] if SeqfeatureQualifierValue.NoteValue in feature.qualifiers else ""))
+            feature.qualifiers.get(SeqfeatureQualifierValue.ProductValue, [""])[0] or (
+                feature.qualifiers.get(SeqfeatureQualifierValue.NoteValue, [""])[0]))
+        
+        
         gene = feature.qualifiers[SeqfeatureQualifierValue.GeneValue][
             0] if SeqfeatureQualifierValue.GeneValue in feature.qualifiers else feature.qualifiers["locus_tag"][0]
         locus_tag = feature.qualifiers[SeqfeatureQualifierValue.LocusTagValue][
@@ -177,7 +179,7 @@ class BioIO:
                 else:
                     self.stderr.write(f"go term {v} not found\n")
 
-
+    # Creates a bioentry for each seqrecord. If the seqrecord has a taxon it is saved to de bioentry. Also creates a biosequence for that bioentry. Then it passes the features to process_feature.
     def process_seqrecord(self, seqrecord):
         be = Bioentry(biodatabase=self.genomedb,
                       name=seqrecord.name, accession=seqrecord.id,
@@ -191,6 +193,7 @@ class BioIO:
 
         bulk_save(seqrecord.features, action=lambda f: self.process_feature(be, f), stderr=self.stderr)
 
+    # Takes the seq_record iterator, saves the description and pass each seqrecord to process_seqrecord.
     def process_record_list(self, seq_record_iterator: Iterable[SeqRecord], contig_count: int):
         first = True
         with tqdm(seq_record_iterator, total=contig_count, file=self.stderr) as pbar:

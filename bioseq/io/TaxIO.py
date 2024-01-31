@@ -34,7 +34,7 @@ class TaxIO:
         return Taxon.objects.filter(ncbi_taxon_id=ncbi_taxid).get()
 
     def get_by_name_from_db(self, taxname: str):
-        return Taxon.objects.filter(scientificName=taxname).exists()
+        return Taxon.objects.filter(scientificName=taxname).get()
 
     def name_exists_in_db(self, taxname: str):
         return Taxon.objects.filter(scientificName=taxname).exists()
@@ -50,7 +50,6 @@ class TaxIO:
             if not self.name_exists_in_db(taxname):
                 taxdto_parent = self.get_tax_from_name(taxname)
                 parent = self.save(taxdto_parent, parent)
-                parent = parent
         if not parent:
             parent = self.get_by_name_from_db(taxname)
 
@@ -71,7 +70,7 @@ class TaxIO:
               # commonName
                 # mitochondrialGeneticCode
             """
-
+        print(taxdto)
         taxon = Taxon(ncbi_taxon_id=int(taxdto["taxId"]),
                       parent_taxon=parent,
                       node_rank=taxdto["rank"],
