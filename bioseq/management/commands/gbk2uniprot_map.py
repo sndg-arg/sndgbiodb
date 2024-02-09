@@ -57,6 +57,11 @@ class Command(BaseCommand):
         protein_ids_qs = BioentryQualifierValue.objects.filter(
             bioentry__biodatabase__name=accession,
             term__identifier="protein_id").values_list("bioentry__bioentry_id", "value")
+        
+        # Extraction of the protein_id and locus_tag from db
+        protein_ids_loc = BioentryQualifierValue.objects.filter(
+            bioentry__biodatabase__name=accession,
+            term__identifier="protein_id").values_list("bioentry__accession", "value") 
 
         fd, path = tempfile.mkstemp()
         temperr = open(fd, "w")
@@ -67,14 +72,20 @@ class Command(BaseCommand):
 
 
         prot_id_bioentry = {}
+        prot_id_loc_tag = {}
+
+        # Creation of the dict
+        for a, b in protein_ids_loc:
+            prot_id_loc_tag[b]=a
+
         if not os.path.exists(options["mapping_tmp"]):
             txttable = ""
             with tqdm(range(0, len(protein_ids_qs), batch_size)) as pbar:
                 for i in pbar:
                     batch = protein_ids_qs[i:i + batch_size]
-
                     for bioentry_id, protein_id in batch:
                         prot_id_bioentry[protein_id] = bioentry_id
+
 
                     ids = ",".join(prot_id_bioentry.keys())
                     cmd = f'''curl --request POST 'https://rest.uniprot.org/idmapping/run' --form 'ids="{ids}"' --form 'from="RefSeq_Protein"' --form 'to="UniProtKB"' '''
@@ -110,9 +121,13 @@ class Command(BaseCommand):
             df = pd.read_csv(csvStringIO, sep="\t",
                              names="From\tEntry\tEntry Name\tReviewed\tProtein names\tGene Names\tOrganism\tLength".split(
                                  "\t"))
+            
+            # Transform dict to df and merge of the locus_tag based on 'From' (protein_id)
+            merge_df = pd.DataFrame(list(prot_id_loc_tag.items()), columns=['From', 'LocusTag'])
+            merged_df = pd.merge(df, merge_df, on='From')
 
             with open(options["mapping_tmp"], "w") as h:
-                df.to_csv(h, index=False)
+                merged_df.to_csv(h, index=False)
             self.stderr.write("------------------------\n")
         else:
 

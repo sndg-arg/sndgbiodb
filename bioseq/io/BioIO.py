@@ -63,6 +63,7 @@ class BioIO:
         self.stderr = sys.stderr
 
     def delete_db(self):
+        #Me parece que esta funcion deberia borrar de tambien las entradas generadas en bioentry, biosequence, qualifiers. Si no el overwrite no funciona
         Biodatabase.objects.filter(name=self.biodb_name).delete()
         Biodatabase.objects.filter(name=self.biodb_name + BioIO.GENOME_PROT_POSTFIX).delete()
         Biodatabase.objects.filter(name=self.biodb_name + BioIO.GENOME_RNAS_POSTFIX).delete()
@@ -188,7 +189,7 @@ class BioIO:
             be.taxon = Taxon.objects.get(ncbi_taxon_id=self.ncbi_tax)
         be.save()
 
-        seq = Biosequence(bioentry=be, seq="", length=len(seqrecord.seq))
+        seq = Biosequence(bioentry=be, seq="", length=len(seqrecord.seq)) 
         seq.save()
 
         bulk_save(seqrecord.features, action=lambda f: self.process_feature(be, f), stderr=self.stderr)

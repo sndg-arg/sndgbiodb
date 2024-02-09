@@ -3,7 +3,6 @@ import shutil
 import sys
 import warnings
 import subprocess as sp
-
 from django.core.management.base import BaseCommand
 
 from bioseq.io.BioIO import BioIO
