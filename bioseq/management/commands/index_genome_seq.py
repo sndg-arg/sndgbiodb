@@ -91,7 +91,7 @@ class Command(BaseCommand):
     def write_gff_contig(self, contig, hg, id_handler, writer):
         writer._write_rec(contig, hg)
         #writer._write_annotations(contig.annotations, contig.id, len(contig.seq), hg)
-        for sf in contig.features:
+        for sf in sorted(contig.features, key=lambda f: f.location.start):
 
             sf = writer._clean_feature(sf)
             if "note" in sf.qualifiers:
