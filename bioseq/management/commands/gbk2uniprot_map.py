@@ -142,9 +142,9 @@ class Command(BaseCommand):
             BioentryQualifierValue.objects.filter(bioentry__biodatabase__name=accession,
                                                   term__identifier="UnipProtName").delete()
         unip_list = []
-        for protein_id, df_prot in tqdm(df.fillna("").groupby("From")):
+        for protein_id, df_prot in tqdm(df.fillna("").groupby("From")): 
             df_prot = df_prot.sort_values("Reviewed")
-            unip_list.append(df_prot.iloc[0]["Entry"])
+            unip_list.append(df_prot.iloc[0]["Entry"] + " " + df_prot.iloc[0]["LocusTag"])
             bioentry_id = prot_id_bioentry[protein_id]
             with transaction.atomic():
 
@@ -179,6 +179,7 @@ class Command(BaseCommand):
 
         temperr.close()
 
+        self.stdout.write("\n".join(unip_list) + "\n")
 
         not_mapped = set(prot_id_bioentry) - set(df["From"])
         if not_mapped:
