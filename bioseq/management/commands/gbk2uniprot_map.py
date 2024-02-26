@@ -131,7 +131,7 @@ class Command(BaseCommand):
             self.stderr.write("------------------------\n")
         else:
 
-            df = pd.read_csv(options.get("mapping_tmp",options["mapping_tmp"] ))
+            merged_df = pd.read_csv(options.get("mapping_tmp",options["mapping_tmp"] ))
             for bioentry_id, protein_id in protein_ids_qs:
                 prot_id_bioentry[protein_id] = bioentry_id
 
@@ -142,7 +142,7 @@ class Command(BaseCommand):
             BioentryQualifierValue.objects.filter(bioentry__biodatabase__name=accession,
                                                   term__identifier="UnipProtName").delete()
         unip_list = []
-        for protein_id, df_prot in tqdm(df.fillna("").groupby("From")): 
+        for protein_id, df_prot in tqdm(merged_df.fillna("").groupby("From")): 
             df_prot = df_prot.sort_values("Reviewed")
             unip_list.append(df_prot.iloc[0]["Entry"] + " " + df_prot.iloc[0]["LocusTag"])
             bioentry_id = prot_id_bioentry[protein_id]
@@ -181,7 +181,7 @@ class Command(BaseCommand):
 
         self.stdout.write("\n".join(unip_list) + "\n")
 
-        not_mapped = set(prot_id_bioentry) - set(df["From"])
+        not_mapped = set(prot_id_bioentry) - set(merged_df["From"])
         if not_mapped:
             if not options["not_mapped"]:
                 options["not_mapped"] = ss.db_dir(options["accession"]) + "/unips_not_mapped.csv"
