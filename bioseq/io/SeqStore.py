@@ -42,7 +42,7 @@ class SeqStore:
         return f'{self.datadir}/{self.idx_dir(accession)}/{accession}/{accession}.faa.gz'
 
     def structure(self, biodbacc, bioentryacc, structacc):
-        return f'{self.datadir}/{self.idx_dir(biodbacc)}/{biodbacc}/{bioentryacc}/{structacc}.pdb.gz'
+        return f'{self.datadir}/{self.idx_dir(biodbacc)}/{biodbacc}/alphafold/{bioentryacc}/{structacc}.pdb.gz'
 
     def structure_dir(self, biodbacc, bioentryacc):
         return f'{self.datadir}/{self.idx_dir(biodbacc)}/{biodbacc}/{bioentryacc}'
