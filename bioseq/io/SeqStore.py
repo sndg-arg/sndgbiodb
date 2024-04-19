@@ -46,3 +46,13 @@ class SeqStore:
 
     def structure_dir(self, biodbacc, bioentryacc):
         return f'{self.datadir}/{self.idx_dir(biodbacc)}/{biodbacc}/{bioentryacc}'
+
+    def ligand(self, accession, ligq_folder):
+        return f'{self.datadir}/{self.idx_dir(accession)}/{accession}/{ligq_folder}/{ligq_folder}/{ligq_folder}_id_smiles.csv'
+    
+    def ligand_json(self, accession, ligq_folder):
+        return f'{self.datadir}/{self.idx_dir(accession)}/{accession}/{ligq_folder}/{ligq_folder}_final.json'
+    
+    def ligand_res_folders(self, accession, ligq_folder):
+        return f'{self.datadir}/{self.idx_dir(accession)}/{accession}/{ligq_folder}/{ligq_folder}/'
+    

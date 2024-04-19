@@ -98,39 +98,42 @@ class Command(BaseCommand):
                                                            identifier="InterProScan")[0]
 
         for acc, df_prot in tqdm(df.groupby("acc")):
-            be = Bioentry.objects.filter(accession=acc).get()
+            try:
+                be = Bioentry.objects.filter(accession=acc).get()
 
-            gos = []
-            with transaction.atomic():
+                gos = []
+                with transaction.atomic():
 
-                for idx, r in df_prot.iterrows():
-                    """
-                    
-                    
-                    source_term = models.ForeignKey('Term', models.DO_NOTHING, related_name="source_of")
-                    display_name = models.CharField(max_length=64, blank=True, null=True)
-                    rank = models.PositiveSmallIntegerField(default=1, null=True)
-                    """
-                    key = r.analysis + "||" + r.accession
-                    sf = Seqfeature(bioentry=be, type_term=terms[key], source_term=terms["InterProScan"],
-                                    display_name=key)
-                    sf.save()
-                    Location(seqfeature=sf, start_pos=r.start, end_pos=r.stop, strand=1).save()
-
-                    if r.IPAcc and (r.IPAcc != "-"):
-                        sf = Seqfeature(bioentry=be, type_term=terms[r.IPAcc], source_term=terms[key],
+                    for idx, r in df_prot.iterrows():
+                        """
+                        
+                        
+                        source_term = models.ForeignKey('Term', models.DO_NOTHING, related_name="source_of")
+                        display_name = models.CharField(max_length=64, blank=True, null=True)
+                        rank = models.PositiveSmallIntegerField(default=1, null=True)
+                        """
+                        key = r.analysis + "||" + r.accession
+                        sf = Seqfeature(bioentry=be, type_term=terms[key], source_term=terms["InterProScan"],
                                         display_name=key)
                         sf.save()
                         Location(seqfeature=sf, start_pos=r.start, end_pos=r.stop, strand=1).save()
 
-                    if r.gos:
-                        gos += r.gos.split("|")
+                        if r.IPAcc and (r.IPAcc != "-"):
+                            sf = Seqfeature(bioentry=be, type_term=terms[r.IPAcc], source_term=terms[key],
+                                            display_name=key)
+                            sf.save()
+                            Location(seqfeature=sf, start_pos=r.start, end_pos=r.stop, strand=1).save()
 
-                for go in set(gos) - set(["-"]):
-                    dbxrefdbqs = Dbxref.objects.filter(dbname=Ontology.GO, accession=go)
-                    if dbxrefdbqs.exists():
-                        BioentryDbxref.objects.get_or_create(dbxref=dbxrefdbqs.get(), bioentry=be)
-                    else:
-                        self.stderr.write(f'GO term {go} was not found in DB')
+                        if r.gos:
+                            gos += r.gos.split("|")
+
+                    for go in set(gos) - set(["-"]):
+                        dbxrefdbqs = Dbxref.objects.filter(dbname=Ontology.GO, accession=go)
+                        if dbxrefdbqs.exists():
+                            BioentryDbxref.objects.get_or_create(dbxref=dbxrefdbqs.get(), bioentry=be)
+                        else:
+                            self.stderr.write(f'GO term {go} was not found in DB')
+            except Exception as e:
+                print(e)
 
         self.stderr.write("\nInterPro data imported!\n")
