@@ -56,3 +56,6 @@ class SeqStore:
     def ligand_res_folders(self, accession, ligq_folder):
         return f'{self.datadir}/{self.idx_dir(accession)}/{accession}/{ligq_folder}/{ligq_folder}/'
     
+    def pwtools_out(self, accession):
+        return f'{self.datadir}/{self.idx_dir(accession)}/{accession}/pwtools_out'
+    
