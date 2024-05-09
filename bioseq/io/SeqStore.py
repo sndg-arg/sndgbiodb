@@ -41,6 +41,9 @@ class SeqStore:
     def faa(self, accession):
         return f'{self.datadir}/{self.idx_dir(accession)}/{accession}/{accession}.faa.gz'
 
+    def faa_decompress(self, accession):
+        return f'{self.datadir}/{self.idx_dir(accession)}/{accession}/{accession}.faa'
+    
     def structure(self, biodbacc, bioentryacc, structacc):
         return f'{self.datadir}/{self.idx_dir(biodbacc)}/{biodbacc}/alphafold/{bioentryacc}/{structacc}.pdb.gz'
 
