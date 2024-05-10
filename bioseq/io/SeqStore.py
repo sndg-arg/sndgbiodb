@@ -62,3 +62,6 @@ class SeqStore:
     def pwtools_out(self, accession):
         return f'{self.datadir}/{self.idx_dir(accession)}/{accession}/pwtools_out'
     
+    def test(self):
+        return f'{self.datadir}/test'
+    
