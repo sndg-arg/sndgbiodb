@@ -32,18 +32,22 @@ class Command(BaseCommand):
 
         # Parse the GBK file into a SeqRecord object
         record = next(SeqIO.parse(h, "genbank"))
-        print(record)
+        i= 0
+        for feature in record.features:
+            i += 1
+            
+            print(feature)
+            if i > 20:
+                break
         # Extract the first 20 genes from the features of the SeqRecord
-        genes = record.features[:20]
+        record.features = record.features[:101]
 
-        # Create a new SeqRecord with only the first 20 genes
-        new_record = record[:len(genes[0].extract(record)) + len(genes[-1].extract(record))]
 
         # Define the output file path
         output_file_path = os.path.join(options["datadir"], f"{accession}.gbk")
 
         # Write the new SeqRecord with only the first 20 genes to a new GBK file
-        SeqIO.write(new_record, output_file_path, "genbank")
+        SeqIO.write(record, output_file_path, "genbank")
 
         print(f"First 20 genes saved to {output_file_path}")
 
