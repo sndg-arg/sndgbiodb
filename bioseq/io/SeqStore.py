@@ -65,3 +65,6 @@ class SeqStore:
     def test(self):
         return f'{self.datadir}/test'
     
+    def psort(self, accession):
+        return f'{self.datadir}/{self.idx_dir(accession)}/{accession}/psort_res'
+    
