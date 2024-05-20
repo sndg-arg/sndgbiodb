@@ -68,3 +68,5 @@ class SeqStore:
     def psort(self, accession):
         return f'{self.datadir}/{self.idx_dir(accession)}/{accession}/psort_res'
     
+    def druggability_tsv(self, accession):
+        return f'{self.datadir}/{self.idx_dir(accession)}/{accession}/druggability.tsv'
