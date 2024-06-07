@@ -73,3 +73,15 @@ class SeqStore:
     
     def psort_tsv(self, accession):
         return f'{self.datadir}/{self.idx_dir(accession)}/{accession}/psort.tsv'
+    
+    def p2rank_pdb_predictions(self, genome, locus_tag):
+        return f'{self.datadir}/{self.idx_dir(genome)}/{genome}/alphafold/{locus_tag}/{locus_tag}_p2rank/{locus_tag}_af.pdb_predictions.csv'
+ 
+    def structure_af_pdb(self, genome, locus_tag):
+        return f'{self.datadir}/{self.idx_dir(genome)}/{genome}/alphafold/{locus_tag}/{locus_tag}_af.pdb'
+
+    def p2rank_fpocket_folder(self, genome, locus_tag):
+        return f'{self.datadir}/{self.idx_dir(genome)}/{genome}/alphafold/{locus_tag}/{locus_tag}_p2rank/fpocket'
+
+    def p2rank_folder(self, genome, locus_tag):
+        return f'{self.datadir}/{self.idx_dir(genome)}/{genome}/alphafold/{locus_tag}/{locus_tag}_p2rank'
