@@ -83,5 +83,8 @@ class SeqStore:
     def p2rank_fpocket_folder(self, genome, locus_tag):
         return f'{self.datadir}/{self.idx_dir(genome)}/{genome}/alphafold/{locus_tag}/{locus_tag}_p2rank/fpocket'
 
+    def p2rank_json(self, genome, locus_tag):
+        return f'{self.datadir}/{self.idx_dir(genome)}/{genome}/alphafold/{locus_tag}/{locus_tag}_p2rank/p2pocket.json.gz'
+
     def p2rank_folder(self, genome, locus_tag):
         return f'{self.datadir}/{self.idx_dir(genome)}/{genome}/alphafold/{locus_tag}/{locus_tag}_p2rank'
