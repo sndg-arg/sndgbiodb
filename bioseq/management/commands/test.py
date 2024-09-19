@@ -39,7 +39,6 @@ class Command(BaseCommand):
         ss = SeqStore(options["datadir"])
         ss.create_idx_dir(accession)
         test_folder = ss.db_dir(accession)
-        print(test_folder)
 
         # Define the output file path
         output_file_path = os.path.join(test_folder, f"{accession}.gbk")
@@ -47,7 +46,6 @@ class Command(BaseCommand):
         # Write the new SeqRecord with only the first 100 genes to a new GBK file
         SeqIO.write(record, output_file_path, "genbank")
 
-        print(f"First 100 genes saved to {output_file_path}")
         # Gzip the file
         with open(output_file_path, 'rb') as f_in, gzip.open(output_file_path + '.gz', 'wb') as f_out:
             shutil.copyfileobj(f_in, f_out)

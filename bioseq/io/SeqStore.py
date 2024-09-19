@@ -70,7 +70,12 @@ class SeqStore:
     
     def druggability_tsv(self, accession):
         return f'{self.datadir}/{self.idx_dir(accession)}/{accession}/druggability.tsv'
-    
+    def human_offtarget(self, accession):
+        return f'{self.datadir}/{self.idx_dir(accession)}/{accession}/human_offtarget.tsv'
+    def micro_offtarget(self, accession):
+        return f'{self.datadir}/{self.idx_dir(accession)}/{accession}/micro_offtarget.tsv'
+    def essenciality(self, accession):
+        return f'{self.datadir}/{self.idx_dir(accession)}/{accession}/essenciality.tsv'
     def psort_tsv(self, accession):
         return f'{self.datadir}/{self.idx_dir(accession)}/{accession}/psort.tsv'
     
