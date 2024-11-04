@@ -52,7 +52,8 @@ class SeqStore:
 
     def ligand(self, accession, ligq_folder):
         return f'{self.datadir}/{self.idx_dir(accession)}/{accession}/{ligq_folder}/{ligq_folder}/{ligq_folder}_id_smiles.csv'
-    
+    def biolip_folder(self, accession, ligq_folder):
+        return f'{self.datadir}/{self.idx_dir(accession)}/{accession}/biolip'
     def ligand_json(self, accession, ligq_folder):
         return f'{self.datadir}/{self.idx_dir(accession)}/{accession}/{ligq_folder}/{ligq_folder}_final.json'
     
